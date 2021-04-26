@@ -11,6 +11,7 @@ class AI2():
         self.numCols = numCols
         self.numBombs = numBombs
         self.safeSquare = safeSquare
+        self.count = 0
         
 
     def open_square_format(self, squareToOpen):
@@ -29,26 +30,28 @@ class AI2():
         unopenedSquares = []
         distribution = boardState.copy()
         bombs_found = []
-
+        board_state_copy = boardState.copy()
         for row in range(self.numRows):
             for col in range(self.numCols):
                 if boardState[row][col] != 9 and boardState[row][col] > 0:
-                    if row + 1 < self.numRows and boardState[row + 1][col] == 9:
-                        boardState[row][col] -= 1
-                    if row - 1 > 0 and boardState[row - 1][col] == 9:
-                        boardState[row][col] -= 1
-                    if col + 1 < self.numCols and boardState[row][col + 1] == 9:
-                        boardState[row][col] -= 1
-                    if col - 1 > 0 and boardState[row][col - 1] == 9:
-                        boardState[row][col] -= 1
-                    if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] == 9:
-                        boardState[row][col] -= 1
-                    if row + 1 < self.numRows and col - 1 > 0 and boardState[row + 1][col - 1] == 9:
-                        boardState[row][col] -= 1
-                    if row - 1 > 0 and col - 1 > 0 and boardState[row - 1][col - 1] == 9:
-                        boardState[row][col] -= 1
-                    if row - 1 > 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] == 9:
-                        boardState[row][col] -= 1
+                    if row + 1 < self.numRows and boardState[row + 1][col] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if row - 1 > 0 and boardState[row - 1][col] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if col + 1 < self.numCols and boardState[row][col + 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if col - 1 > 0 and boardState[row][col - 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if row + 1 < self.numRows and col - 1 > 0 and boardState[row + 1][col - 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if row - 1 > 0 and col - 1 > 0 and boardState[row - 1][col - 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+                    if row - 1 > 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] == 9 and board_state_copy[row][col] > 0:
+                        board_state_copy[row][col] -= 1
+
+        boardState = board_state_copy
 
 
         for row in range(self.numRows):
@@ -60,23 +63,25 @@ class AI2():
                 if boardState[row][col] != -1:
                     distribution[row][col] = 0
                     continue
+                if boardState[row][col] == -1:
+                    unopenedSquares.append((row, col))
                 total = 0
                 if row + 1 < self.numRows and boardState[row + 1][col] != 9 and boardState[row + 1][col] > 0:
-                    total += 1
+                    total += boardState[row + 1][col]
                 if row - 1 > 0 and boardState[row - 1][col] != 9 and boardState[row - 1][col] > 0:
-                    total += 1
+                    total += boardState[row - 1][col]
                 if col + 1 < self.numCols and boardState[row][col + 1] != 9 and boardState[row][col + 1] > 0:
-                    total += 1
+                    total += boardState[row][col + 1]
                 if col - 1 > 0 and boardState[row][col - 1] != 9 and boardState[row][col - 1] > 0:
-                    total += 1
+                    total += boardState[row][col - 1]
                 if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] != 9 and boardState[row + 1][col + 1] > 0:
-                    total += 1
+                    total += boardState[row + 1][col + 1]
                 if row + 1 < self.numRows and col - 1 > 0 and boardState[row + 1][col - 1] != 9 and boardState[row + 1][col - 1] > 0:
-                    total += 1
+                    total += boardState[row + 1][col - 1]
                 if row - 1 > 0 and col - 1 > 0 and boardState[row - 1][col - 1] != 9 and boardState[row - 1][col - 1] > 0:
-                    total += 1
+                    total += boardState[row - 1][col - 1]
                 if row - 1 > 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] != 9 and boardState[row - 1][col + 1] > 0:
-                    total += 1
+                    total += boardState[row - 1][col + 1]
                 distribution[row][col] = total
         
         
@@ -88,12 +93,17 @@ class AI2():
         else:
             # Otherwise, pick a random square and open it    
             flat_distribution = distribution.flatten()  
-            normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
-            print(normalized_distribution)
-            max_index = np.random.choice(a = len(normalized_distribution), p = normalized_distribution)
-            adjusted_index = np.unravel_index(max_index, distribution.shape)
+            squareToOpen = None
+            if sum(flat_distribution) != 0:
+                normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
+                max_index = normalized_distribution.index(max(normalized_distribution))
+                adjusted_index = np.unravel_index(max_index, distribution.shape)
             # squareToOpen = random.choice(unopenedSquares)
-            squareToOpen = adjusted_index
+                squareToOpen = adjusted_index
+            else:
+                self.count += 1
+                print("ALL ZERO: ", self.count)
+                squareToOpen = random.choice(unopenedSquares)
             print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)
 

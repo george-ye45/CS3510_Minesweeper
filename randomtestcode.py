@@ -11,7 +11,6 @@ class AI1():
         self.numCols = numCols
         self.numBombs = numBombs
         self.safeSquare = safeSquare
-        self.q_vals = {}
 
     def open_square_format(self, squareToOpen):
         return ("open_square", squareToOpen)
@@ -24,7 +23,7 @@ class AI1():
     # an AI example that returns a random square (r, c) that you want to open
     # TODO: implement a better algorithm
     def performAI(self, boardState):
-        print("Board state: ", boardState)
+        print(boardState)
 
         # find all the unopened squares
         unopenedSquares = []
