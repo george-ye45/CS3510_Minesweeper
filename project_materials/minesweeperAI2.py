@@ -29,6 +29,28 @@ class AI2():
         unopenedSquares = []
         distribution = boardState.copy()
         bombs_found = []
+
+        for row in range(self.numRows):
+            for col in range(self.numCols):
+                if boardState[row][col] != 9 and boardState[row][col] > 0:
+                    if row + 1 < self.numRows and boardState[row + 1][col] == 9:
+                        boardState[row][col] -= 1
+                    if row - 1 > 0 and boardState[row - 1][col] == 9:
+                        boardState[row][col] -= 1
+                    if col + 1 < self.numCols and boardState[row][col + 1] == 9:
+                        boardState[row][col] -= 1
+                    if col - 1 > 0 and boardState[row][col - 1] == 9:
+                        boardState[row][col] -= 1
+                    if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] == 9:
+                        boardState[row][col] -= 1
+                    if row + 1 < self.numRows and col - 1 > 0 and boardState[row + 1][col - 1] == 9:
+                        boardState[row][col] -= 1
+                    if row - 1 > 0 and col - 1 > 0 and boardState[row - 1][col - 1] == 9:
+                        boardState[row][col] -= 1
+                    if row - 1 > 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] == 9:
+                        boardState[row][col] -= 1
+
+
         for row in range(self.numRows):
             for col in range(self.numCols):
                 if boardState[row][col] == 9:
