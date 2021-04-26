@@ -42,6 +42,10 @@ class AI1():
         else:
             # Otherwise, pick a random square and open it      
             squareToOpen = random.choice(unopenedSquares)
+            print("HERE: ", squareToOpen)
             print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)
-        
+    
+
+    def q_learning_helper(self):
+        pass

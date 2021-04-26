@@ -11,6 +11,7 @@ class AI2():
         self.numCols = numCols
         self.numBombs = numBombs
         self.safeSquare = safeSquare
+        
 
     def open_square_format(self, squareToOpen):
         return ("open_square", squareToOpen)
@@ -24,20 +25,59 @@ class AI2():
     # TODO: implement a better algorithm
     def performAI(self, boardState):
         print(boardState)
-
         # find all the unopened squares
         unopenedSquares = []
+        distribution = boardState.copy()
+        bombs_found = []
         for row in range(self.numRows):
             for col in range(self.numCols):
-                if boardState[row][col] == -1:
-                    unopenedSquares.append((row, col))
-
-        if len(unopenedSquares) == self.numBombs:
+                if boardState[row][col] == 9:
+                    bombs_found.append((row, col))
+                    distribution[row][col] = 0
+                    continue
+                if boardState[row][col] != -1:
+                    distribution[row][col] = 0
+                    continue
+                total = 0
+                if row + 1 < self.numRows and boardState[row + 1][col] != 9 and boardState[row + 1][col] > 0:
+                    total += 1
+                if row - 1 > 0 and boardState[row - 1][col] != 9 and boardState[row - 1][col] > 0:
+                    total += 1
+                if col + 1 < self.numCols and boardState[row][col + 1] != 9 and boardState[row][col + 1] > 0:
+                    total += 1
+                if col - 1 > 0 and boardState[row][col - 1] != 9 and boardState[row][col - 1] > 0:
+                    total += 1
+                if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] != 9 and boardState[row + 1][col + 1] > 0:
+                    total += 1
+                if row + 1 < self.numRows and col - 1 > 0 and boardState[row + 1][col - 1] != 9 and boardState[row + 1][col - 1] > 0:
+                    total += 1
+                if row - 1 > 0 and col - 1 > 0 and boardState[row - 1][col - 1] != 9 and boardState[row - 1][col - 1] > 0:
+                    total += 1
+                if row - 1 > 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] != 9 and boardState[row - 1][col + 1] > 0:
+                    total += 1
+                distribution[row][col] = total
+        
+        
+        distribution = np.array(distribution)
+        if len(bombs_found) == self.numBombs:
             # If the number of unopened squares is equal to the number of bombs, all squares must be bombs, and we can submit our answer
-            print(f"List of bombs is {unopenedSquares}")
-            return self.submit_final_answer_format(unopenedSquares)
+            print(f"List of bombs is {bombs_found}")
+            return self.submit_final_answer_format(bombs_found)
         else:
-            # Otherwise, pick a random square and open it      
-            squareToOpen = random.choice(unopenedSquares)
+            # Otherwise, pick a random square and open it    
+            flat_distribution = distribution.flatten()  
+            normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
+            print(normalized_distribution)
+            max_index = np.random.choice(a = len(normalized_distribution), p = normalized_distribution)
+            adjusted_index = np.unravel_index(max_index, distribution.shape)
+            # squareToOpen = random.choice(unopenedSquares)
+            squareToOpen = adjusted_index
             print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)
+
+
+
+
+
+
+    
