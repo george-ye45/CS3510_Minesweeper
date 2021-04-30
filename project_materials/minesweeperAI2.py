@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+
+
 class AI2():
 
     # Define settings upon initialization. Here you can specify
@@ -12,7 +14,45 @@ class AI2():
         self.numBombs = numBombs
         self.safeSquare = safeSquare
         self.count = 0
-        
+
+    def check_high_prob(self, boardState):
+        board_state_copy = boardState.copy()
+        highest_prob = 0
+        highest_prob_list = []
+        for row in range(self.numRows):
+            for col in range(self.numCols):
+                if (boardState[row][col] > 0 and boardState[row][col] < 9):
+                    unopened_list = []
+                    if row + 1 < self.numRows and boardState[row + 1][col] == -1:
+                        unopened_list.append((row + 1, col))
+                    if row - 1 >= 0 and boardState[row - 1][col] == -1:
+                        unopened_list.append((row - 1, col))
+                    if col + 1 < self.numCols and boardState[row][col + 1] == -1:
+                        unopened_list.append((row, col + 1))
+                    if col - 1 >= 0 and boardState[row][col - 1] == -1:
+                        unopened_list.append((row, col - 1))
+                    if row + 1 < self.numRows and col + 1 < self.numCols and boardState[row + 1][col + 1] == -1:
+                        unopened_list.append((row + 1, col + 1))
+                    if row + 1 < self.numRows and col - 1 >= 0 and boardState[row + 1][col - 1] == -1:
+                        unopened_list.append((row + 1, col - 1))
+                    if row - 1 >= 0 and col - 1 >= 0 and boardState[row - 1][col - 1] == -1:
+                        unopened_list.append((row - 1, col - 1))
+                    if row - 1 >= 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] == -1:
+                        unopened_list.append((row - 1, col + 1))
+                    if len(unopened_list) != 0:
+                        curr_prob = boardState[row][col]/len(unopened_list)
+                    else:
+                        curr_prob = 0.0
+                    print(curr_prob)
+                    if curr_prob >= .50 and curr_prob > highest_prob and curr_prob >= 1:
+                        highest_prob = curr_prob
+                        highest_prob_list = unopened_list
+
+        if highest_prob >= .50:
+            return True, highest_prob_list
+        else:
+            return False, highest_prob_list
+
     def guarantee_bombs(self, boardState):
         board_state_copy = boardState.copy()
         for row in range(self.numRows):
@@ -117,8 +157,6 @@ class AI2():
         
         return nearby
 
-
-
     # return the square (r, c) you want to open based on the given boardState
     # the boardState will contain the value (0-8 inclusive) of the square, or -1 if that square is unopened
     # an AI example that returns a random square (r, c) that you want to open
@@ -174,7 +212,11 @@ class AI2():
             # Otherwise, pick a random square and open it    
             flat_distribution = distribution.flatten()  
             squareToOpen = None
-            if sum(flat_distribution) != 0:
+            highProb, list_to_choose = self.check_high_prob(boardState)
+            if highProb:
+                print("YayAYAYAYAYYAYAYAYYAAY")
+                squareToOpen = random.choice(list_to_choose)
+            elif sum(flat_distribution) != 0:
                 normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
                 #max_index = np.random.choice(a = len(normalized_distribution), p = normalized_distribution)
                 max_index = normalized_distribution.index(max(normalized_distribution))
@@ -184,10 +226,10 @@ class AI2():
             else:
                 self.count += 1
                 print("ALL ZERO: ", self.count)
-                print("BEFORE")
-                print(boardState)
+                #print("BEFORE")
+                #print(boardState)
                 bad = self.removeAroundZero(boardState)
-                print("BAD: ", bad)
+                #print("BAD: ", bad)
                 #squareToOpen = random.choice(unopenedSquares)
                 squareToOpen = random.choice(list(set(unopenedSquares) - set(bad)))
             print(f"Square to open is {squareToOpen}")
