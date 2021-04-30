@@ -11,13 +11,15 @@ class AI1():
         self.numCols = numCols
         self.numBombs = numBombs
         self.safeSquare = safeSquare
-        self.q_vals = {}
 
     def open_square_format(self, squareToOpen):
         return ("open_square", squareToOpen)
 
     def submit_final_answer_format(self, listOfBombs):
         return ("final_answer", listOfBombs)
+    
+
+    
 
     # return the square (r, c) you want to open based on the given boardState
     # the boardState will contain the value (0-8 inclusive) of the square, or -1 if that square is unopened
@@ -43,10 +45,5 @@ class AI1():
         else:
             # Otherwise, pick a random square and open it      
             squareToOpen = random.choice(unopenedSquares)
-            print("HERE: ", squareToOpen)
             print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)
-    
-
-    def q_learning_helper(self):
-        pass
