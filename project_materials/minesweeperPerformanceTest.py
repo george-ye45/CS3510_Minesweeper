@@ -336,7 +336,7 @@ elif sys.argv[1] in ["--test", "-t"] and len(sys.argv) == 4:
     # Example Command: python3 minesweeperPerformanceTest.py -t b 1
     elif sys.argv[2] == "b":
         arr = os.listdir('./varied_size_boards')
-        columns = ["board_size", "board_number", "runtime", "dig_density"]
+        columns = ["board_area", "board_number", "runtime", "dig_density"]
         data = []
         result = None
         for i in arr:
@@ -352,7 +352,7 @@ elif sys.argv[1] in ["--test", "-t"] and len(sys.argv) == 4:
                 outcome = "Correct Bomb List"
             rows = int(i[0:2])
             cols = int(i[7:9])
-            current_run = ["{} x {}".format(rows, cols), i[18], round(app.time, 3), app.numDigs / (rows * cols)]
+            current_run = [rows * cols, i[18], round(app.time, 3), app.numDigs / (rows * cols)]
             data.append(current_run)  
         result = pd.DataFrame(columns = columns, data = data) 
         print(result)
