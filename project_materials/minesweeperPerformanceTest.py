@@ -328,7 +328,7 @@ elif sys.argv[1] in ["--test", "-t"] and len(sys.argv) == 4:
                 outcome = "Incorrect Bomb List"
             elif app.outcome == 1:
                 outcome = "Correct Bomb List"
-            current_run = [i[9], i[12], round(app.time, 3), app.numDigs / 400]
+            current_run = [i[8:10], i[12], round(app.time, 3), app.numDigs / 400]
             data.append(current_run)
         result = pd.DataFrame(columns = columns, data = data)
         print(result)
