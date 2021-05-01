@@ -43,8 +43,7 @@ class AI2():
                         curr_prob = boardState[row][col]/len(unopened_list)
                     else:
                         curr_prob = 0.0
-                    print(curr_prob)
-                    if curr_prob >= .50 and curr_prob > highest_prob and curr_prob >= 1:
+                    if .50 <= curr_prob < 1 and curr_prob > highest_prob:
                         highest_prob = curr_prob
                         highest_prob_list = unopened_list
 
@@ -53,8 +52,9 @@ class AI2():
         else:
             return False, highest_prob_list
 
-    def guarantee_bombs(self, boardState):
+    def guarantee_bombs(self, boardState, bombsfound):
         board_state_copy = boardState.copy()
+        found = False
         for row in range(self.numRows):
             for col in range(self.numCols):
                 squares = []
@@ -78,9 +78,12 @@ class AI2():
 
                 if len(squares) == board_state_copy[row][col] and board_state_copy[row][col] != 0:
                     for i in squares:
-                        board_state_copy[i[0]][i[1]] = 9
-        
-        return board_state_copy
+                        if board_state_copy[i[0]][i[1]] != 9 and (i[0], i[1]) in bombsfound:
+                            found = True
+                            bombsfound.append(i)
+                            board_state_copy[row][col] -= 1
+                            board_state_copy[i[0]][i[1]] = 9
+        return board_state_copy, found, bombsfound
                 
 
     def subtract_board(self, boardState):
@@ -167,17 +170,19 @@ class AI2():
         unopenedSquares = []
         distribution = boardState.copy()
         bombs_found = []
-        found = True
-        boardState = self.subtract_board(boardState)
-        boardState = self.guarantee_bombs(boardState)
-
-
         for row in range(self.numRows):
             for col in range(self.numCols):
                 if boardState[row][col] == 9:
                     bombs_found.append((row, col))
                     distribution[row][col] = 0
-                    continue
+        found = True
+        boardState = self.subtract_board(boardState)
+        while found:
+            boardState, found, bombs_found = self.guarantee_bombs(boardState, bombs_found)
+
+
+        for row in range(self.numRows):
+            for col in range(self.numCols):
                 if boardState[row][col] != -1:
                     distribution[row][col] = 0
                     continue
@@ -201,7 +206,7 @@ class AI2():
                 if row - 1 >= 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] != 9 and boardState[row - 1][col + 1] > 0:
                     total += boardState[row - 1][col + 1]
                 distribution[row][col] = total
-        
+
         
         distribution = np.array(distribution)
         if len(bombs_found) == self.numBombs:
@@ -214,7 +219,6 @@ class AI2():
             squareToOpen = None
             highProb, list_to_choose = self.check_high_prob(boardState)
             if highProb:
-                print("YayAYAYAYAYYAYAYAYYAAY")
                 squareToOpen = random.choice(list_to_choose)
             elif sum(flat_distribution) != 0:
                 normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
