@@ -43,7 +43,8 @@ class AI2():
                         curr_prob = boardState[row][col]/len(unopened_list)
                     else:
                         curr_prob = 0.0
-                    if .50 <= curr_prob < 1 and curr_prob > highest_prob:
+                    print(curr_prob)
+                    if curr_prob >= .50 and curr_prob > highest_prob and curr_prob < 1:
                         highest_prob = curr_prob
                         highest_prob_list = unopened_list
 
@@ -143,19 +144,19 @@ class AI2():
         nearby = []
         if row + 1 < self.numRows:
             nearby.append(boardState[row + 1][col])
-        if row - 1 > 0:
+        if row - 1 >= 0:
             nearby.append(boardState[row - 1][col])
         if col + 1 < self.numCols:
             nearby.append(boardState[row][col + 1])
-        if col - 1 > 0:
+        if col - 1 >= 0:
             nearby.append(boardState[row][col - 1])
         if row + 1 < self.numRows and col + 1 < self.numCols:
             nearby.append(boardState[row + 1][col + 1])
-        if row + 1 < self.numRows and col - 1 > 0:
+        if row + 1 < self.numRows and col - 1 >= 0:
             nearby.append(boardState[row + 1][col - 1])
-        if row - 1 > 0 and col - 1 > 0:
+        if row - 1 >= 0 and col - 1 >= 0:
             nearby.append(boardState[row - 1][col - 1])
-        if row - 1 > 0 and col + 1 < self.numCols:
+        if row - 1 >= 0 and col + 1 < self.numCols:
             nearby.append(boardState[row - 1][col + 1])
         
         return nearby
@@ -179,6 +180,7 @@ class AI2():
         boardState = self.subtract_board(boardState)
         while found:
             boardState, found, bombs_found = self.guarantee_bombs(boardState, bombs_found)
+        all_negative = []
 
 
         for row in range(self.numRows):
@@ -187,7 +189,19 @@ class AI2():
                     distribution[row][col] = 0
                     continue
                 if boardState[row][col] == -1:
+                    nearby = self.check_nearby_squares(boardState, row, col)
+                    if 0 in nearby:
+                        distribution[row][col] = 0
+                        continue
                     unopenedSquares.append((row, col))
+                    is_neg = True
+                    for i in nearby:
+                        if i != -1:
+                            is_neg = False
+                            break
+                    if is_neg:
+                        all_negative.append((row, col))
+
                 total = 0
                 if row + 1 < self.numRows and boardState[row + 1][col] != 9 and boardState[row + 1][col] > 0:
                     total += boardState[row + 1][col]
@@ -213,29 +227,33 @@ class AI2():
             # If the number of unopened squares is equal to the number of bombs, all squares must be bombs, and we can submit our answer
             print(f"List of bombs is {bombs_found}")
             return self.submit_final_answer_format(bombs_found)
-        else:
-            # Otherwise, pick a random square and open it    
-            flat_distribution = distribution.flatten()  
+        else: 
+            flat_distribution = distribution.flatten().tolist()
             squareToOpen = None
             highProb, list_to_choose = self.check_high_prob(boardState)
             if highProb:
                 squareToOpen = random.choice(list_to_choose)
             elif sum(flat_distribution) != 0:
-                normalized_distribution = [ i /sum(flat_distribution) for i in flat_distribution]
                 #max_index = np.random.choice(a = len(normalized_distribution), p = normalized_distribution)
-                max_index = normalized_distribution.index(max(normalized_distribution))
+                max_index = flat_distribution.index(max(flat_distribution))
                 adjusted_index = np.unravel_index(max_index, distribution.shape)
             # squareToOpen = random.choice(unopenedSquares)
                 squareToOpen = adjusted_index
             else:
                 self.count += 1
                 print("ALL ZERO: ", self.count)
-                #print("BEFORE")
-                #print(boardState)
-                bad = self.removeAroundZero(boardState)
-                #print("BAD: ", bad)
-                #squareToOpen = random.choice(unopenedSquares)
-                squareToOpen = random.choice(list(set(unopenedSquares) - set(bad)))
+                if len(all_negative) != 0:
+                    print("HERE in neg")
+                    squareToOpen = random.choice(all_negative)
+                else:
+                    bad = self.removeAroundZero(boardState)
+                    squareToOpen = random.choice(list(set(unopenedSquares) - set(bad)))
+                # #print("BEFORE")
+                # #print(boardState)
+                # bad = self.removeAroundZero(boardState)
+                # #print("BAD: ", bad)
+                # #squareToOpen = random.choice(unopenedSquares)
+                # squareToOpen = random.choice(list(set(unopenedSquares) - set(bad)))
             print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)
 

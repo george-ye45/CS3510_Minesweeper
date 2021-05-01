@@ -7,6 +7,8 @@ import minesweeperAI1
 import minesweeperAI2
 import time
 import json
+import os
+import pandas as pd
 
 # Here, we are creating our class, Window, and inheriting from the Frame
 # class. Frame is a class from the tkinter module. (see Lib/tkinter/__init__)
@@ -305,6 +307,56 @@ elif sys.argv[1] in ["--file", "-f"] and len(sys.argv) == 4:
         outcome = "Correct Bomb List"
 
     print(f"totalDigs={app.numDigs}, totalTime={round(app.time, 3)}, outcome={outcome}")    
+
+
+elif sys.argv[1] in ["--test", "-t"] and len(sys.argv) == 4:
+
+    # Example command: python3 minesweeperPerformanceTest.py -t d 1
+    if (sys.argv[2]) == "d":       
+        arr = os.listdir('./varied_density_boards')
+        columns = ["bomb_density", "board_number", "runtime", "dig_density"]
+        data = []
+        result = None
+        for i in arr:
+            root = Tk()
+            root.geometry("800x800")
+            app = Window(master = root)
+            app.setupFile(testcase_filename = "varied_density_boards/{}".format(i), AIType = int(sys.argv[3]))
+            root.mainloop()    
+            outcome = "ERROR"
+            if app.outcome == -1: 
+                outcome = "Incorrect Bomb List"
+            elif app.outcome == 1:
+                outcome = "Correct Bomb List"
+            current_run = [i[9], i[12], round(app.time, 3), app.numDigs / 400]
+            data.append(current_run)
+        result = pd.DataFrame(columns = columns, data = data)
+        print(result)
+        result.to_csv("density_change_{}.csv".format(int(sys.argv[3])), index = False, header = True)
+    # Example Command: python3 minesweeperPerformanceTest.py -t b 1
+    elif sys.argv[2] == "b":
+        arr = os.listdir('./varied_size_boards')
+        columns = ["board_size", "board_number", "runtime", "dig_density"]
+        data = []
+        result = None
+        for i in arr:
+            root = Tk()
+            root.geometry("800x800")
+            app = Window(master = root)
+            app.setupFile(testcase_filename = "varied_size_boards/{}".format(i), AIType = int(sys.argv[3]))
+            root.mainloop()    
+            outcome = "ERROR"      
+            if app.outcome == -1: 
+                outcome = "Incorrect Bomb List"
+            elif app.outcome == 1:
+                outcome = "Correct Bomb List"
+            rows = int(i[0:2])
+            cols = int(i[7:9])
+            current_run = ["{} x {}".format(rows, cols), i[18], round(app.time, 3), app.numDigs / (rows * cols)]
+            data.append(current_run)  
+        result = pd.DataFrame(columns = columns, data = data) 
+        print(result)
+        result.to_csv("board_size_change_{}.csv".format(int(sys.argv[3])), index = False, header = True)
 
 else:
     print("usage: -f <file_name.json> <algoType>, or -g <x_dim> <y_dim> <num_bombs> <safe_x> <safe_y> <algoType> <numGames>")
