@@ -93,5 +93,5 @@ class AI1():
                     max_index = np.random.choice(a = len(normalized_distribution), p = normalized_distribution)
                     adjusted_index = np.unravel_index(max_index, distribution.shape)
                     squareToOpen = adjusted_index
-            #print(f"Square to open is {squareToOpen}")
+            print(f"Square to open is {squareToOpen}")
             return self.open_square_format(squareToOpen)

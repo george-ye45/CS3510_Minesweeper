@@ -13,7 +13,6 @@ class AI2():
         self.numCols = numCols
         self.numBombs = numBombs
         self.safeSquare = safeSquare
-        self.count = 0
 
     def check_high_prob(self, boardState):
         board_state_copy = boardState.copy()
@@ -97,7 +96,6 @@ class AI2():
                             if i[0] - 1 >= 0 and i[1] + 1 < self.numCols and 0 < boardState[i[0] - 1][i[1] + 1] < 9:
                                 board_state_copy[i[0] - 1][i[1] + 1] -= 1
                             board_state_copy[i[0]][i[1]] = 9
-                            print("guarantee found")
         return board_state_copy, found, bombsfound
                 
 
@@ -180,7 +178,6 @@ class AI2():
     # an AI example that returns a random square (r, c) that you want to open
     # TODO: implement a better algorithm
     def performAI(self, boardState):
-        print(boardState)
         # find all the unopened squares
         unopenedSquares = []
         distribution = boardState.copy()
@@ -242,18 +239,13 @@ class AI2():
             squareToOpen = None
             highProb, list_to_choose = self.check_high_prob(boardState)
             if highProb:
-                #print("HIGH PROB")
                 squareToOpen = random.choice(list_to_choose)
             elif sum(flat_distribution) != 0:
-                #print("POLICY")
                 max_index = flat_distribution.index(max(flat_distribution))
                 adjusted_index = np.unravel_index(max_index, distribution.shape)
                 squareToOpen = adjusted_index
             else:
-                self.count += 1
-                print("ALL ZERO: ", self.count)
                 if len(all_negative) != 0:
-                    print("HERE in neg")
                     squareToOpen = random.choice(all_negative)
                 else:
                     bad = self.removeAroundZero(boardState)
