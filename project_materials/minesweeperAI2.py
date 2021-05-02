@@ -43,7 +43,6 @@ class AI2():
                         curr_prob = boardState[row][col]/len(unopened_list)
                     else:
                         curr_prob = 0.0
-                    print(curr_prob)
                     if curr_prob >= .50 and curr_prob > highest_prob and curr_prob < 1:
                         highest_prob = curr_prob
                         highest_prob_list = unopened_list
@@ -75,14 +74,28 @@ class AI2():
                     squares.append((row - 1, col - 1))
                 if row - 1 >= 0 and col + 1 < self.numCols and boardState[row - 1][col + 1] == -1:
                     squares.append((row - 1, col + 1))
-                
 
                 if len(squares) == board_state_copy[row][col] and board_state_copy[row][col] != 0:
                     for i in squares:
-                        if board_state_copy[i[0]][i[1]] != 9 and (i[0], i[1]) in bombsfound:
+                        if board_state_copy[i[0]][i[1]] != 9 and (i[0], i[1]) not in bombsfound:
                             found = True
                             bombsfound.append(i)
-                            board_state_copy[row][col] -= 1
+                            if i[0] + 1 < self.numRows and 0 < boardState[i[0] + 1][i[1]] < 9:
+                                board_state_copy[i[0] + 1][i[1]] -= 1
+                            if i[0] - 1 >= 0 and 0 < boardState[i[0] - 1][i[1]] < 9:
+                                board_state_copy[i[0] - 1][i[1]] -= 1
+                            if i[1] + 1 < self.numCols and 0 < boardState[i[0]][i[1] + 1] < 9:
+                                board_state_copy[i[0]][i[1] + 1] -= 1
+                            if i[1] - 1 >= 0 and 0 < boardState[i[0]][i[1] - 1] < 9:
+                                board_state_copy[i[0]][i[1] - 1] -= 1
+                            if i[0] + 1 < self.numRows and i[1] + 1 < self.numCols and 0 < boardState[i[0] + 1][i[1] + 1] < 9:
+                                board_state_copy[i[0] + 1][i[1] + 1] -= 1
+                            if i[0] + 1 < self.numRows and i[1] - 1 >= 0 and 0 < boardState[i[0] + 1][i[1] - 1] < 9:
+                                board_state_copy[i[0] + 1][i[1] - 1] -= 1
+                            if i[0] - 1 >= 0 and i[1] - 1 >= 0 and 0 < boardState[i[0] - 1][i[1] - 1] < 9:
+                                board_state_copy[i[0] - 1][i[1] - 1] -= 1
+                            if i[0] - 1 >= 0 and i[1] + 1 < self.numCols and 0 < boardState[i[0] - 1][i[1] + 1] < 9:
+                                board_state_copy[i[0] - 1][i[1] + 1] -= 1
                             board_state_copy[i[0]][i[1]] = 9
                             print("guarantee found")
         return board_state_copy, found, bombsfound
@@ -183,7 +196,6 @@ class AI2():
             boardState, found, bombs_found = self.guarantee_bombs(boardState, bombs_found)
         all_negative = []
 
-
         for row in range(self.numRows):
             for col in range(self.numCols):
                 if boardState[row][col] != -1:
@@ -230,10 +242,10 @@ class AI2():
             squareToOpen = None
             highProb, list_to_choose = self.check_high_prob(boardState)
             if highProb:
-                print("HIGH PROB")
+                #print("HIGH PROB")
                 squareToOpen = random.choice(list_to_choose)
             elif sum(flat_distribution) != 0:
-                print("POLICY")
+                #print("POLICY")
                 max_index = flat_distribution.index(max(flat_distribution))
                 adjusted_index = np.unravel_index(max_index, distribution.shape)
                 squareToOpen = adjusted_index
